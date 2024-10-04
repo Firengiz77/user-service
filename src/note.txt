@@ -1,0 +1,8 @@
+register (role, jwt token nezere alinmasi) +
+update user (auth()->user() ile, token olacaq)
+login (using role)
+email authentication ()
+authorize (roles: admin,user)
+user detail page
+forgot-password
+as admin get all users
