@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/user_service
     username: root
-    password:
+    password: Firengiz77
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -13,3 +13,9 @@ spring:
 jwt:
  secret: S3cR3t_K3y!gklD90$5h&4df!
  expiration: 86400000  # 24 hours
+
+doc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html

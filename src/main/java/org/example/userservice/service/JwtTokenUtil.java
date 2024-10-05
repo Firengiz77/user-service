@@ -3,16 +3,13 @@ package org.example.userservice.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.example.userservice.Role;
+import org.example.userservice.enums.Role;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -21,13 +18,12 @@ public class JwtTokenUtil {
     private static final String SECRET_KEY =  "cQ1d1qFusK692sd6d7msjp4CaVjTd8h6UezTyan7Pq8=";
 
     public String extractUsername(String token) {
-        System.out.println("token: "+ token);
-        System.out.println("getUserName+ " + extractClaim(token, Claims::getSubject));
         return extractClaim(token, Claims::getSubject);
     }
 
-
-
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
+    }
 
 
     public Date extractExpiration(String token) {
@@ -47,7 +43,7 @@ public class JwtTokenUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(String username, Role role) {
+    public String generateToken(String username,Role role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
         return createToken(claims, username);
@@ -60,11 +56,6 @@ public class JwtTokenUtil {
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
-
-    public String extractRole(String token) {
-        return extractClaim(token, claims -> claims.get("role", String.class));
-    }
-
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);

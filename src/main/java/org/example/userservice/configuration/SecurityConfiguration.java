@@ -26,8 +26,9 @@ public class SecurityConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/user/register", "/user/login").permitAll()
-                        .requestMatchers("/user/update").hasRole("USER")
+                        .requestMatchers("/user/register", "/user/login","/admin/login","/admin/login").permitAll()
+                        .requestMatchers("/user/update","/user/update/password").hasAuthority("USER")
+                        .requestMatchers("/admin/update","/admin/update/password","admin/users").hasAuthority("ADMIN")
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);

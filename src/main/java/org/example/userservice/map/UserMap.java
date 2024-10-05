@@ -7,7 +7,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
-import java.util.Optional;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE,
         componentModel = "spring",
@@ -17,7 +16,6 @@ public interface  UserMap {
 
     UserDto toUserDto(User user);
     User toEntity(UserDto user);
-
     List<UserDto> toDto(List<User> users);
-    List<User> toEntity(List<UserDto> userDto);
+
 }

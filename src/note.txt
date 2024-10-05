@@ -1,8 +1,16 @@
 register (role, jwt token nezere alinmasi) +
-update user (auth()->user() ile, token olacaq)
-login (using role)
-email authentication ()
-authorize (roles: admin,user)
-user detail page
-forgot-password
-as admin get all users
+login  (jwt token) +
+Permission for every role +
+update user (auth()->user() ile, token olacaq) +
+change-password (token) +
+
+admin ucun:
+register +
+login +
+Update Profile +
+Update password +
+See all users +
+
+Kodlari seliqeye salmaq +
+Lazimsiz kodlari silmek +
+Swagger istifadesi +
