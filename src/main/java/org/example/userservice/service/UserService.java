@@ -1,7 +1,6 @@
 package org.example.userservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.userservice.dto.UserRoleDto;
 import org.example.userservice.enums.Permission;
 import org.example.userservice.enums.Role;
 import org.example.userservice.dto.UserDto;
@@ -15,7 +14,6 @@ import org.example.userservice.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Random;
 
 @Service
@@ -107,11 +105,5 @@ public class UserService {
 
     public boolean hasPermission(Role role, Permission permission) {
         return role.getPermissions().contains(permission);
-    }
-
-    public UserRoleDto getRole(String token) {
-        String username = getUsernameToken(token);
-        User user = userRepository.findByUsername(username);
-        return userMap.toUserRoleDto(user);
     }
 }
