@@ -1,11 +1,6 @@
 package org.example.userservice.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,9 +11,8 @@ import org.example.userservice.enums.Role;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Table(name = "app_user")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,6 +22,7 @@ public class User {
     private String username;
     private String email;
     private String password;
+    private float balance;
 
     @Enumerated(EnumType.STRING)
     private Role role;

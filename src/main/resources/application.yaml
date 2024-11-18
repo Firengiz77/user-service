@@ -2,16 +2,17 @@ spring:
   application:
     name: user-service
   datasource:
-    url: jdbc:mysql://localhost:3306/user_service
-    username: root
+    url: jdbc:postgresql://ecom.cdsiw8okgh2n.eu-central-1.rds.amazonaws.com:5432/ecom
+    username: fira
     password: Firengiz77
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
 jwt:
- secret: S3cR3t_K3y!gklD90$5h&4df!
  expiration: 86400000  # 24 hours
 server:
   port: 8081

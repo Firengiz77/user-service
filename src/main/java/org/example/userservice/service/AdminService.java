@@ -1,12 +1,16 @@
 package org.example.userservice.service;
 
-import org.example.userservice.dto.UserDto;
-import org.example.userservice.enums.Role;
+import org.example.userservice.dto.request.AdminRequestDto;
+import org.example.userservice.dto.response.AdminDto;
+import org.example.userservice.dto.response.UserDto;
 import org.example.userservice.exception.EmailAlreadyException;
 import org.example.userservice.exception.IncorrectPassword;
 import org.example.userservice.exception.NotFoundUserException;
+import org.example.userservice.map.AdminMap;
 import org.example.userservice.map.UserMap;
+import org.example.userservice.model.Admin;
 import org.example.userservice.model.User;
+import org.example.userservice.repository.AdminRepository;
 import org.example.userservice.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,87 +22,92 @@ import java.util.Random;
 public class AdminService {
 
     private final PasswordEncoder passwordEncoder;
-    private final UserRepository userRepository;
+    private final AdminRepository adminRepository;
+    private final AdminMap adminMap;
     private final UserMap userMap;
     private final JwtTokenUtil jwtTokenUtil;
+    private final UserRepository userRepository;
 
-    public AdminService(PasswordEncoder passwordEncoder, UserRepository userRepository, UserMap userMap, JwtTokenUtil jwtTokenUtil) {
+    public AdminService(PasswordEncoder passwordEncoder,
+                        AdminRepository adminRepository,
+                        AdminMap adminMap,
+                        JwtTokenUtil jwtTokenUtil,
+                        UserRepository userRepository,
+                        UserMap userMap) {
         this.passwordEncoder = passwordEncoder;
-        this.userRepository = userRepository;
+        this.adminRepository = adminRepository;
+        this.adminMap = adminMap;
         this.userMap = userMap;
         this.jwtTokenUtil = jwtTokenUtil;
+        this.userRepository = userRepository;
     }
 
-    public UserDto createUser(User request) {
+    public AdminDto createUser(AdminRequestDto request) {
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (adminRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyException(request.getEmail());
         }
-        User user = User.builder()
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
-                .email(request.getEmail())
-                .role(Role.USER)
-                .password(passwordEncoder.encode(request.getPassword()))
-                .username(generateRandomUsername())
-                .build();
+        Admin admin = adminMap.fromRequest(request);
+        admin.setFirstname(request.getFirstname());
+        admin.setLastname(request.getLastname());
+        admin.setEmail(request.getEmail());
+        admin.setPassword(passwordEncoder.encode(request.getPassword()));
+        admin.setUsername(generateRandomUsername());
+        adminRepository.save(admin);
 
-        return  generateTokenUserDto(user.getUsername(),user.getRole(),user);
+        return  generateTokenAdminDto(admin.getUsername(),admin);
     }
 
-    public UserDto updateUser(User request, String token) {
+    public AdminDto updateUser(Admin request, String token) {
 
         String username = getUsernameToken(token);
-        User user = userRepository.findByUsername(username);
-        user.setFirstname(request.getFirstname());
-        user.setLastname(request.getLastname());
-
+        Admin admin = adminRepository.findByUsername(username);
+        admin.setFirstname(request.getFirstname());
+        admin.setLastname(request.getLastname());
         if (request.getPassword() != null) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            admin.setPassword(passwordEncoder.encode(request.getPassword()));
         }
+        AdminDto adminDto = adminMap.toAdminDto(adminRepository.save(admin));
+        adminDto.setToken(token);
 
-        UserDto userDto = userMap.toUserDto(userRepository.save(user));
-        userDto.setToken(token);
-
-        return userDto;
+        return adminDto;
     }
 
-    public UserDto updatePassword(String password, String token) {
+    public AdminDto updatePassword(String password, String token) {
 
         String username = getUsernameToken(token);
-        User user = userRepository.findByUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
-        UserDto userDto = userMap.toUserDto(userRepository.save(user));
-        userDto.setToken(token);
+        Admin admin = adminRepository.findByUsername(username);
+        admin.setPassword(passwordEncoder.encode(password));
+        AdminDto adminDto = adminMap.toAdminDto(adminRepository.save(admin));
+        adminDto.setToken(token);
 
-        return userDto;
+        return adminDto;
     }
 
-    public UserDto login(String email, String password) {
+    public AdminDto login(String email, String password) {
 
-        if (!userRepository.existsByEmail(email)) {
+        if (!adminRepository.existsByEmail(email)) {
             throw new NotFoundUserException();
         }
 
-        User user = userRepository.findByEmail(email);
+        Admin admin = adminRepository.findByEmail(email);
 
-        if (!passwordEncoder.matches(password, user.getPassword())) {
+        if (!passwordEncoder.matches(password, admin.getPassword())) {
             throw new IncorrectPassword(email);
         }
 
-        return  generateTokenUserDto(user.getUsername(),user.getRole(),user);
+        return  generateTokenAdminDto(admin.getUsername(),admin);
     }
 
     private String getUsernameToken(String token){
         return jwtTokenUtil.extractUsername(token);
     }
 
-    private UserDto generateTokenUserDto(String username,Role role,User user) {
-        String token = jwtTokenUtil.generateToken(username,role);
-        UserDto userDto = userMap.toUserDto(user);
-        userDto.setToken(token);
-
-        return userDto;
+    private AdminDto generateTokenAdminDto(String username,Admin admin) {
+        String token = jwtTokenUtil.generateAdminToken(username);
+        AdminDto adminDto = adminMap.toAdminDto(admin);
+        adminDto.setToken(token);
+        return adminDto;
     }
 
     private String generateRandomUsername() {
@@ -108,10 +117,10 @@ public class AdminService {
         return String.valueOf(randomNumber);
     }
 
-    public List<UserDto> getUsers() {
-        List<User> users = userRepository.findByRole(Role.USER);
-        List<UserDto> userDto = userMap.toDto(users);
-
-        return userDto;
+    public List<UserDto> getUsers(String token) {
+        String username = getUsernameToken(token);
+        Admin admin = adminRepository.findByUsername(username);
+        List<User> users = userRepository.findAll();
+        return userMap.toDto(users);
     }
 }

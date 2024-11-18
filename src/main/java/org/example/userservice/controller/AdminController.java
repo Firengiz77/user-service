@@ -1,8 +1,10 @@
 package org.example.userservice.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.example.userservice.dto.UserDto;
-import org.example.userservice.model.User;
+import org.example.userservice.dto.request.AdminRequestDto;
+import org.example.userservice.dto.response.AdminDto;
+import org.example.userservice.dto.response.UserDto;
+import org.example.userservice.model.Admin;
 import org.example.userservice.service.AdminService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,27 +25,28 @@ public class AdminController {
     }
 
     @PostMapping("/admin/register")
-    public UserDto register(@RequestBody User user) {
-        return adminService.createUser(user);
+    public AdminDto register(@RequestBody AdminRequestDto admin) {
+        return adminService.createUser(admin);
     }
 
     @PostMapping("/admin/login")
-    public UserDto login(@RequestParam String email, @RequestParam String password) {
+    public AdminDto login(@RequestParam String email, @RequestParam String password) {
         return adminService.login(email,password);
     }
 
     @PutMapping("/admin/update")
-    public UserDto update(@RequestBody User user, HttpServletRequest httpServletRequest) {
+    public AdminDto update(@RequestBody Admin admin, HttpServletRequest httpServletRequest) {
         String authorizationHeader = httpServletRequest.getHeader("Authorization");
         String token = null;
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             token = authorizationHeader.substring(7);
         }
-        return adminService.updateUser(user,token);
+        System.out.println("token"+token);
+        return adminService.updateUser(admin,token);
     }
 
     @PutMapping("/admin/update/password")
-    public UserDto updatePassword(@RequestParam String password, HttpServletRequest httpServletRequest) {
+    public AdminDto updatePassword(@RequestParam String password, HttpServletRequest httpServletRequest) {
         String authorizationHeader = httpServletRequest.getHeader("Authorization");
         String token = null;
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -52,9 +55,14 @@ public class AdminController {
         return adminService.updatePassword(password,token);
     }
 
-    @GetMapping("/admin/users")
-    public List<UserDto> getUsers() {
-        return adminService.getUsers();
-    }
 
+    @GetMapping("/admin/users")
+    public List<UserDto>  getUsers(HttpServletRequest httpServletRequest){
+        String authorizationHeader = httpServletRequest.getHeader("Authorization");
+        String token = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            token = authorizationHeader.substring(7);
+        }
+        return adminService.getUsers(token);
+    }
 }

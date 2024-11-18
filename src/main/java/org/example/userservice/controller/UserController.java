@@ -1,7 +1,8 @@
 package org.example.userservice.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.example.userservice.dto.UserDto;
+import org.example.userservice.dto.request.UserRequestDto;
+import org.example.userservice.dto.response.UserDto;
 import org.example.userservice.model.User;
 import org.example.userservice.service.UserService;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,7 +22,7 @@ public class UserController {
     }
 
     @PostMapping("/user/register")
-    public UserDto register(@RequestBody User user) {
+    public UserDto register(@RequestBody UserRequestDto user) {
         return userService.createUser(user);
     }
 
@@ -48,6 +49,16 @@ public class UserController {
             token = authorizationHeader.substring(7);
         }
         return userService.updatePassword(password,token);
+    }
+
+    @PutMapping("/user/update/balance")
+    public UserDto updateBalance(@RequestParam float balance, HttpServletRequest httpServletRequest) {
+        String authorizationHeader = httpServletRequest.getHeader("Authorization");
+        String token = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            token = authorizationHeader.substring(7);
+        }
+        return userService.updateBalance(balance,token);
     }
 
 }

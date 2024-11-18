@@ -14,3 +14,9 @@ See all users +
 Kodlari seliqeye salmaq +
 Lazimsiz kodlari silmek +
 Swagger istifadesi +
+
+createden builderi yigisdir+
+user balance yaratmaq / her defesinde uzerine gelmeli +
+
+Userle bagli xirda detallar :
+user profile photo yeri qoymaq  / sekili update/delete

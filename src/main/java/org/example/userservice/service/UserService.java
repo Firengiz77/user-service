@@ -1,9 +1,10 @@
 package org.example.userservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.userservice.dto.request.UserRequestDto;
 import org.example.userservice.enums.Permission;
 import org.example.userservice.enums.Role;
-import org.example.userservice.dto.UserDto;
+import org.example.userservice.dto.response.UserDto;
 import org.example.userservice.exception.EmailAlreadyException;
 import org.example.userservice.exception.IncorrectPassword;
 import org.example.userservice.exception.NotFoundUserException;
@@ -25,20 +26,19 @@ public class UserService {
     private final UserMap userMap;
     private final JwtTokenUtil jwtTokenUtil;
 
-    public UserDto createUser(User request) {
+    public UserDto createUser(UserRequestDto request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyException(request.getEmail());
         }
-
-        User user = User.builder()
-                .firstname(request.getFirstname())
-                .lastname(request.getLastname())
-                .email(request.getEmail())
-                .role(Role.USER)
-                .password(passwordEncoder.encode(request.getPassword()))
-                .username(generateRandomUsername())
-        .build();
+        User user = userMap.fromRequest(request);
+        user.setFirstname(request.getFirstname());
+        user.setLastname(request.getLastname());
+        user.setEmail(request.getEmail());
+        user.setRole(Role.USER);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setUsername(generateRandomUsername());
+        userRepository.save(user);
 
         return  generateTokenUserDto(user.getUsername(),user.getRole(),user);
     }
@@ -58,14 +58,12 @@ public class UserService {
     }
 
     public UserDto updatePassword(String password, String token) {
-
         String username = getUsernameToken(token);
         User user = userRepository.findByUsername(username);
         user.setPassword(passwordEncoder.encode(password));
         UserDto userDto = userMap.toUserDto(userRepository.save(user));
         userDto.setToken(token);
         return userDto;
-
     }
 
     public UserDto login(String email, String password) {
@@ -105,5 +103,13 @@ public class UserService {
 
     public boolean hasPermission(Role role, Permission permission) {
         return role.getPermissions().contains(permission);
+    }
+
+    public UserDto updateBalance(float balance, String token) {
+        String username = getUsernameToken(token);
+        User user = userRepository.findByUsername(username);
+        float newBalance = user.getBalance() + balance;
+        user.setBalance(newBalance);
+        return userMap.toUserDto(userRepository.save(user));
     }
 }

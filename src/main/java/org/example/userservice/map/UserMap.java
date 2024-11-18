@@ -1,6 +1,7 @@
 package org.example.userservice.map;
 
-import org.example.userservice.dto.UserDto;
+import org.example.userservice.dto.request.UserRequestDto;
+import org.example.userservice.dto.response.UserDto;
 import org.example.userservice.model.User;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
@@ -13,9 +14,9 @@ import java.util.List;
         injectionStrategy = InjectionStrategy.CONSTRUCTOR
 )
 public interface  UserMap {
-
     UserDto toUserDto(User user);
     User toEntity(UserDto user);
+    User fromRequest(UserRequestDto userRequestDto);
     List<UserDto> toDto(List<User> users);
 
 }
